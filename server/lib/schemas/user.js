@@ -21,7 +21,7 @@ const UserSchema = {
 			users: {
 				type: GraphQLList(UserType),
 				async resolve(root, args, context, info) {
-					const users = await UserModel.find().exec()
+					const users = await UserModel.find();
 					if (!users) {
 						throw new Error('Error')
 					}
@@ -34,7 +34,7 @@ const UserSchema = {
 					id: { type: GraphQLNonNull(GraphQLID) }
 				},
 				async resolve(root, args, context, info) {
-					const user = await UserModel.findById(args.id).exec();
+					const user = await UserModel.findById(args.id);
 					if (!user) {
 						throw new Error('Error')
 					}
@@ -46,8 +46,8 @@ const UserSchema = {
 				args: {
 					email: { type: GraphQLNonNull(GraphQLString) }
 				},
-				resolve: (root, params, context, info) => {
-					const user = UserModel.find({ 'email': params.id }).exec();
+				async resolve(root, args, context, info) {
+					const user = await UserModel.find({ 'email': args.id });
 					if (!user) {
 						throw new Error('Error')
 					}
@@ -93,11 +93,9 @@ const UserSchema = {
 
 					const newUserModel = await new UserModel(args);
 					const newUser = await newUserModel.save();
-
 					if (!newUser) {
 						throw new Error('Error')
 					}
-
 					return newUser;
 				}
 			},
@@ -125,13 +123,23 @@ const UserSchema = {
 					}
 				},
 				async resolve(root, args, context, info) {
-					return UserModel.findByIdAndUpdate(args.id, { 
-						name: args.name,
-						lastname: args.lastname,
-						email: args.email
-					}, function (err) {
-						if (err) return next(err);
-					});
+					const userToUpdate = await UserModel.findById(args.id);
+					if (!userToUpdate) {
+						throw new Error('Does not exist the user');
+					}
+
+					for (let property in args) {
+						if (args[property] != userToUpdate[property] && args[property] != '') {
+							userToUpdate[property] = args[property]
+						}
+					}
+
+					const userUpdated = await userToUpdate.save();
+					if (!userUpdated) {
+						throw new Error('Error updating user');
+					}
+
+					return userUpdated;
 				}
 			},
 			removeUser: {
