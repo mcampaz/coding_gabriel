@@ -1,0 +1,20 @@
+body {
+  padding: 50px;
+}
+
+.max-width {
+  max-width: 30rem;
+}
+
+tr:hover {
+  background: rgba(204, 204, 204, 0.609);
+}
+
+th:hover,
+td:hover {
+  background: #c3c3c3;
+}
+
+.left-space {
+  margin-left: 20px;
+}
